@@ -4,58 +4,80 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-
+import com.example.doerpinghaus.leuchteclient.Logging;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import static com.example.doerpinghaus.leuchteclient.Logging.loggen;
+
 public class IO extends Thread {
-    public IO(MainActivity main){
-
-        mainActivity = main;
-    }
 
 
-    MainActivity mainActivity;
-    Socket socket;
-    Handler handlerForMain= new Handler(Looper.getMainLooper());    //https://medium.com/@yossisegev/understanding-activity-runonuithread-e102d388fe93
+           static MainActivity mainActivity;
+           static Socket socket;
+            public Handler mHandler;
+
+
+
+    String ip;
+
+
 
     @Override
     public void run() {
+        Looper.prepare();
 
-        if(socket==null){
-            {
-                try {
-                    //socket = new Socket("10.0.75.1", 55551);
-                    socket = new Socket("192.168.0.2", 55551);
-                    handlerForMain.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mainActivity.changeConnectStatusTextView("Verbunden.");
-                            mainActivity.setIOLooper(Looper.myLooper());
-                        }
-                    });
-                    System.out.println("jo");
-                    senden("asd");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }}
-        while(true){}
+         mHandler = new Handler() {
+            public void handleMessage(Message msg) {
+
+
+            }
+        };
+
+        Looper.loop();
     }
 
+
+   /* @Override
+    public void run() {
+
+
+                handlerForMain.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainActivity.changeConnectStatusTextView("Verbunden.");
+                        mainActivity.setConnected(true);
+                        mainActivity.setIOLooper(Looper.myLooper());
+                    }
+                });
+                loggen("======Client angemeldet.");
+                senden("000;000");
+
+
+   */ }
+
+
+
+
     public void senden(String raus){
-        if(socket!=null){
+
             PrintWriter printWriter;
             try {
                 printWriter   = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
                 printWriter.print(raus);
                 printWriter.flush();
-              //  printWriter.close();
+                //  printWriter.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                loggen(e);
             }
         }
 
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }
