@@ -1,10 +1,7 @@
 package com.example.doerpinghaus.leuchteclient;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Debug;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.*;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -19,7 +16,7 @@ import static com.example.doerpinghaus.leuchteclient.Logging.loggen;
 
 public class MainActivity extends AppCompatActivity {
     IO io ;
-    TikTok tikTok;
+    TikToker tikTok;
     Button connectButton;
     Button resetButton;
     TextView connectStatustextView;
@@ -31,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
     SeekBar gruenSeekBar;
 
 
-    static Socket socket;
 
     int debugPressed=0;
     int startSeekBarValue;
@@ -55,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         connectButton = (Button)findViewById(R.id.connectButton) ;
         resetButton=(Button)findViewById(R.id.resetButton);
         connectStatustextView = (TextView)findViewById(R.id.connectStatustextView);
@@ -130,11 +127,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-
-
-
     }
 
     public void resetSenden(View v){
@@ -142,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         IOHandler.post(new Runnable() {
             @Override
             public void run() {
-                io.senden("reset");
+               mkMessageAndSend("reset");
             }
         });
         loggen("======Resettet.");
@@ -157,16 +149,19 @@ public class MainActivity extends AppCompatActivity {
         IOHandler.post(new Runnable() {
             @Override
             public void run() {
-                io.senden(seekBarNummer+";"+aufladeZeit);
+               mkMessageAndSend(seekBarNummer+";"+aufladeZeit);
             }
         });
 
     }
 
-    public static Socket getSocket() {
-        return socket;
-    }
 
+
+    public void mkMessageAndSend(String msg){
+        Message neuemsg = Message.obtain();
+        neuemsg.obj = msg;
+        io.mHandler.handleMessage(neuemsg);
+    }
 
     public void setIOLooper(Looper in){
         IOLooper=in;
@@ -175,28 +170,15 @@ public class MainActivity extends AppCompatActivity {
     public void changeConnectStatusTextView(String rein){
         connectStatustextView.setText(rein);
     }
+
     public void verbinden(View v){
-
-        if(socket==null){
-            try {
-
-
-            if(IPeditText.getText().toString().equals("IP")){
-                socket=new Socket("10.0.75.1", 55551);
-
-            }else{
-                socket=new Socket(IPeditText.getText().toString(), 55551);
-            }
-            }catch (Exception e){
-                loggen(e);
-            }
-
+        if(io==null) {
+           io=new IO(IPeditText.getText().toString(), this);
+        }else{
+            if(!isConnected())
+                io.verbinden(IPeditText.getText().toString());
         }
 
-        if(socket!=null) {
-
-                tikTok =new TikTok(this)
-
     }
-}
-}
+    }
+
