@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
     public void verbinden(View v){
         if(io==null) {
            io=new IO(IPeditText.getText().toString(), this);
+           io.start();
         }else{
             if(!isConnected())
                 io.verbinden(IPeditText.getText().toString());

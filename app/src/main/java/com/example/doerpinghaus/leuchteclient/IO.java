@@ -15,21 +15,25 @@ import static com.example.doerpinghaus.leuchteclient.Logging.loggen;
 
 public class IO extends Thread {
     boolean isConnected=false;
+    String ip;
+    MainActivity mainActivity;
+    Socket socket;
+    public Handler mHandler;
+    TikToker tikTok;
+    boolean inputHandler;
     public IO(String ip, MainActivity mainActivityrein){
         mainActivity=mainActivityrein;
-        verbinden(ip);
+        this.ip =ip;
+        mHandler=new Handler();
     }
 
 
-            MainActivity mainActivity;
-            Socket socket;
-           public Handler mHandler;
-            TikToker tikTok;
+
 
     Handler handlerForMain= new Handler(Looper.getMainLooper());
-    String ip;
 
-    public  void verbinden(String ip){
+
+    void verbinden(String ip){
         try {
 
 
@@ -49,7 +53,7 @@ public class IO extends Thread {
                     mainActivity.connectButton.setEnabled(false);
                 }
             });
-            start();
+
 
             tikTok = new TikToker(ip,mainActivity, socket, this);
             tikTok.start();
@@ -63,7 +67,7 @@ public class IO extends Thread {
 
 
 
-    }
+        }
     }
 
     String leseNachricht() throws IOException {
@@ -81,46 +85,55 @@ public class IO extends Thread {
         return nachricht;
     }
 
+    public void prepare(){
 
+
+
+    }
     @Override
     public void run() {
-
         Looper.prepare();
 
-         mHandler = new Handler() {
+        mHandler = new Handler(Looper.myLooper()) {
             public void handleMessage(Message msg) {
-                senden((String)msg.obj);
-
+                senden((String) msg.obj);
             }
         };
-         if(!isConnected&&tikTok!=null){
-             handlerForMain.post(new Runnable() {
-                 @Override
-                 public void run() {
-                     mainActivity.connectButton.setEnabled(true);
-                     mainActivity.connectStatustextView.setText("Verbindung verloren.");
-                 }
-             });
 
-         }
 
-        String nachricht="";
+        if (tikTok == null) {
+            verbinden(ip);
+        }
+
+
+        if (!isConnected && tikTok != null) {
+            handlerForMain.post(new Runnable() {
+                @Override
+                public void run() {
+                    mainActivity.connectButton.setEnabled(true);
+                    mainActivity.connectStatustextView.setText("Verbindung verloren.");
+                }
+            });
+
+        }
+
+
+        String nachricht = "";
         try {
-            nachricht=leseNachricht();
-            if(nachricht.equals("tok")){
-            tikTok.setTiktokListe(new TikTok(true, Calendar.getInstance().getTimeInMillis()));
-            System.out.println("tok");
+            while(isConnected) {
+                nachricht = leseNachricht();
+                if (nachricht.equals("tok")) {
+                    tikTok.setTiktokListe(new TikTok(true, Calendar.getInstance().getTimeInMillis()));
+                    System.out.println("tok");
+                }
             }
-
-
-
         } catch (IOException e) {
             loggen(e);
         }
 
-
-
         Looper.loop();
+
+
     }
 
 
@@ -145,18 +158,18 @@ public class IO extends Thread {
 
 
 
-     void senden(String raus){
+    void senden(String raus){
 
-            PrintWriter printWriter;
-            try {
-                printWriter   = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-                printWriter.print(raus);
-                printWriter.flush();
-                //  printWriter.close();
-            } catch (IOException e) {
-                loggen(e);
-            }
+        PrintWriter printWriter;
+        try {
+            printWriter   = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+            printWriter.print(raus);
+            printWriter.flush();
+            //  printWriter.close();
+        } catch (IOException e) {
+            loggen(e);
         }
+    }
 
     public String getIp() {
         return ip;
