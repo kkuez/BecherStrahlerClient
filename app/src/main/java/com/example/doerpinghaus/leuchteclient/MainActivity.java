@@ -73,17 +73,17 @@ public class MainActivity extends AppCompatActivity {
         rotSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                seekBarSenden(1,seekBar.getProgress());
 
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                startSeekBarValue=rotSeekBar.getProgress();
+                startSeekBarValue=seekBar.getProgress();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                seekBarSenden(1,seekBar.getProgress());
                 loggen( "(Pin 1 gesetzt "+startSeekBarValue+" -> "+rotSeekBar.getProgress()+" )");
             }
         });
