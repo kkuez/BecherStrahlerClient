@@ -16,7 +16,6 @@ import static com.example.doerpinghaus.leuchteclient.Logging.loggen;
 
 public class MainActivity extends AppCompatActivity {
     IO io ;
-    TikToker tikTok;
     Button connectButton;
     Button resetButton;
     TextView connectStatustextView;
@@ -152,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
                mkMessageAndSend(seekBarNummer+";"+aufladeZeit);
             }
         });
-
     }
 
 
@@ -160,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
     public void mkMessageAndSend(String msg){
         Message neuemsg = Message.obtain();
         neuemsg.obj = msg;
-        io.mHandler.handleMessage(neuemsg);
+        io.looperThread.loopHandler.handleMessage(neuemsg);
     }
 
     public void setIOLooper(Looper in){

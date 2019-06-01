@@ -14,13 +14,14 @@ import java.util.List;
 import static com.example.doerpinghaus.leuchteclient.Logging.loggen;
 
 public class IO extends Thread {
-    boolean isConnected=false;
+    ;
     String ip;
     MainActivity mainActivity;
     Socket socket;
     public Handler mHandler;
     TikToker tikTok;
     boolean inputHandler;
+    LooperThread looperThread;
     public IO(String ip, MainActivity mainActivityrein){
         mainActivity=mainActivityrein;
         this.ip =ip;
@@ -43,14 +44,12 @@ public class IO extends Thread {
             }else{
                 socket=new Socket(ip, 55551);
             }
-            isConnected=true;
+
             handlerForMain.post(new Runnable() {
                 @Override
                 public void run() {
-                    mainActivity.changeConnectStatusTextView("Verbunden.");
                     mainActivity.setConnected(true);
                     mainActivity.setIOLooper(Looper.myLooper());
-                    mainActivity.connectButton.setEnabled(false);
                 }
             });
 
@@ -58,6 +57,7 @@ public class IO extends Thread {
             tikTok = new TikToker(ip,mainActivity, socket, this);
             tikTok.start();
         }catch (Exception e){
+            e.printStackTrace();
             loggen(e);
         }
 
@@ -92,48 +92,45 @@ public class IO extends Thread {
     }
     @Override
     public void run() {
-        Looper.prepare();
+        looperThread = new LooperThread(mainActivity);
+        looperThread.start();
 
-        mHandler = new Handler(Looper.myLooper()) {
-            public void handleMessage(Message msg) {
-                senden((String) msg.obj);
-            }
-        };
 
 
         if (tikTok == null) {
             verbinden(ip);
         }
+        while(true){
+            if (!mainActivity.connected && tikTok != null) {
+                handlerForMain.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainActivity.connectButton.setEnabled(true);
+                        mainActivity.connectStatustextView.setText("Verbindung verloren.");
+                    }
+                });
 
-
-        if (!isConnected && tikTok != null) {
-            handlerForMain.post(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.connectButton.setEnabled(true);
-                    mainActivity.connectStatustextView.setText("Verbindung verloren.");
-                }
-            });
-
-        }
-
-
-        String nachricht = "";
-        try {
-            while(isConnected) {
-                nachricht = leseNachricht();
-                if (nachricht.equals("tok")) {
-                    tikTok.setTiktokListe(new TikTok(true, Calendar.getInstance().getTimeInMillis()));
-                    System.out.println("tok");
-                }
             }
-        } catch (IOException e) {
-            loggen(e);
-        }
 
-        Looper.loop();
-
-
+            String nachricht = "";
+            try {
+                while(mainActivity.connected) {
+                    handlerForMain.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mainActivity.changeConnectStatusTextView("Verbunden.");
+                            mainActivity.connectButton.setEnabled(false);
+                        }
+                    });
+                    nachricht = leseNachricht();
+                    if (nachricht.equals("tok")) {
+                        tikTok.setTiktokListe(new TikTok(true, Calendar.getInstance().getTimeInMillis()));
+                        System.out.println("tok");
+                    }
+                }
+            } catch (IOException e) {
+                loggen(e);
+            }}
     }
 
 

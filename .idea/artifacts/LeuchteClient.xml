@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="apk" name="LeuchteClient">
+    <output-path>$PROJECT_DIR$/out/artifacts/LeuchteClient</output-path>
+    <properties id="android-properties">
+      <options>
+        <option name="keyStoreUrl" value="file://" />
+      </options>
+    </properties>
+    <root id="archive" name="LeuchteClient.apk" />
+  </artifact>
+</component>
