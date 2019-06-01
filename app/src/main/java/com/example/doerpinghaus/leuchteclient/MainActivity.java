@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
         blauSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                seekBarSenden(5,seekBar.getProgress());
 
             }
 
@@ -102,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                seekBarSenden(5,seekBar.getProgress());
                 loggen( "(Pin 5 gesetzt "+startSeekBarValue+" -> "+blauSeekBar.getProgress()+" )");
             }
         });
@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         gruenSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                seekBarSenden(6,seekBar.getProgress());
 
             }
 
@@ -121,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                seekBarSenden(6,seekBar.getProgress());
                 loggen( "(Pin 6 gesetzt "+startSeekBarValue+" -> "+gruenSeekBar.getProgress()+" )");
             }
         });
